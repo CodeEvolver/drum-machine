@@ -104,9 +104,9 @@ function DrumPads ({getPlayed}) {
    }
 
    return (
-      <div id="drum-pads" className="border h-50 w-50 text-center row">
+      <div id="drum-pads" className="border h-50 w-50 w-sm-50 row p-2 rounded-bottom">
          {drumBeats.map((beat, id) => 
-            <button id={id} key={beat.id} className="drum-pad col-4 mx-auto" ref={btnRef} onClick={()=>playAudio(beat.id, beat.name)}>
+            <button id={id} key={beat.id} className="drum-pad col-4 mx-auto rounded-2 border-light" ref={btnRef} onClick={()=>playAudio(beat.id, beat.name)}>
                {beat.innerText}
                <audio ref={(node) => {
                 const map = getMap();
