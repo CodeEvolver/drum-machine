@@ -1,4 +1,4 @@
-import {useEffect, useRef, useState} from 'react';
+import {useEffect, useRef} from 'react';
 
 import Cev from "../Assets/Cev_H2.mp3";
 import Dsc from "../Assets/Dsc_Oh.mp3";
@@ -67,34 +67,40 @@ const drumBeats = [
    },
 ];
 
-function DrumPads ({getPlayed}) {
-   const [audio, setAudio] = useState(null);
+function DrumPads ({getPlayed, volume, power}) {
    const currAudio = useRef(null);
    const btnRef = useRef(null)
 
    const playAudio = (id, name) => {
-      const map = getMap();
-      const node = map.get(id);
-      node.play();
-      getPlayed(name);
+      if(power) {
+         const map = getMap();
+         const node = map.get(id);
+         node.volume = volume;
+         node.play();
+         getPlayed(name);
+      }
    }
    const playPressedAudio = (id, name) => {
       const audio = document.getElementById(id);
       if(audio) { 
+         audio.volume = volume;
          audio.play();
          getPlayed(name);
       }
    }
-   useEffect(() =>
-      document.addEventListener("keydown", (event) => {
-         const id = event.key.toUpperCase();
-         const audio = document.getElementById(id);
-         if(audio) {
-            const name = audio.getAttribute("name");
-            playPressedAudio(id, name);
-         }
-      })
-   )
+
+   useEffect(() => {
+      if(power===true) {      
+         document.addEventListener("keydown", (event) => {
+            const id = event.key.toUpperCase();
+            const audio = document.getElementById(id);
+            if(audio) {
+               const name = audio.getAttribute("name");
+               playPressedAudio(id, name);
+            }
+         })
+      };
+   })
 
    const getMap = () => {
       if(!currAudio.current) {
@@ -103,10 +109,22 @@ function DrumPads ({getPlayed}) {
       return currAudio.current;
    }
 
+   const drmbsStyle = {
+      maxWidth: "576px",
+      gap: "0.04px",
+   }
+
+   const drmPadStyle = {
+      color:"#00B8D4",
+      fontWeight: "500",
+      backgroundColor: "#ECEFF1",
+      boxShadow: "0px 0px 6px 0px #9E9E9E",
+   }
+
    return (
-      <div id="drum-pads" className="border h-50 w-50 w-sm-50 row p-2 rounded-bottom">
+      <div id="drum-pads" className="h-75 row px-2 rounded-bottom w-100" style={drmbsStyle}>
          {drumBeats.map((beat, id) => 
-            <button id={id} key={beat.id} className="drum-pad col-4 mx-auto rounded-2 border-light" ref={btnRef} onClick={()=>playAudio(beat.id, beat.name)}>
+            <button id={id} key={beat.id} className="drum-pad h-25 col-3 mx-auto rounded-2 border-0" ref={btnRef} onClick={()=>playAudio(beat.id, beat.name)} style={drmPadStyle}>
                {beat.innerText}
                <audio ref={(node) => {
                 const map = getMap();
