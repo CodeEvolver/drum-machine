@@ -1,4 +1,4 @@
-import {useEffect, useRef} from 'react';
+import {useEffect, useRef, useCallback} from 'react';
 
 import Cev from "../Assets/Cev_H2.mp3";
 import Dsc from "../Assets/Dsc_Oh.mp3";
@@ -69,7 +69,6 @@ const drumBeats = [
 
 function DrumPads ({getPlayed, volume, power}) {
    const currAudio = useRef(null);
-   const btnRef = useRef(null)
 
    const playAudio = (id, name) => {
       if(power) {
@@ -80,27 +79,28 @@ function DrumPads ({getPlayed, volume, power}) {
          getPlayed(name);
       }
    }
-   const playPressedAudio = (id, name) => {
-      const audio = document.getElementById(id);
-      if(audio) { 
+
+   const playAudioAlt = useCallback((audio) => {
+      if(audio && power) {
+         const name = audio.getAttribute("name");
          audio.volume = volume;
          audio.play();
          getPlayed(name);
       }
-   }
+   }, [power, getPlayed, volume])
 
-   useEffect(() => {
-      if(power===true) {      
-         document.addEventListener("keydown", (event) => {
-            const id = event.key.toUpperCase();
-            const audio = document.getElementById(id);
-            if(audio) {
-               const name = audio.getAttribute("name");
-               playPressedAudio(id, name);
-            }
-         })
+   useEffect(() => { 
+      const handleKeydown = (event) => {
+         const id = event.key.toUpperCase();
+         const audio = document.getElementById(id);
+         playAudioAlt(audio);
       };
-   })
+      document.addEventListener("keydown", handleKeydown);
+
+      return () => {
+         document.removeEventListener("keydown", handleKeydown);
+      }
+   }, [playAudioAlt])
 
    const getMap = () => {
       if(!currAudio.current) {
@@ -124,7 +124,7 @@ function DrumPads ({getPlayed, volume, power}) {
    return (
       <div id="drum-pads" className="h-75 row px-2 rounded-bottom w-100" style={drmbsStyle}>
          {drumBeats.map((beat, id) => 
-            <button id={id} key={beat.id} className="drum-pad h-25 col-3 mx-auto rounded-2 border-0" ref={btnRef} onClick={()=>playAudio(beat.id, beat.name)} style={drmPadStyle}>
+            <button id={id} key={beat.id} className="drum-pad h-25 col-3 mx-auto rounded-2 border-0" onClick={()=>playAudio(beat.id, beat.name)} style={drmPadStyle}>
                {beat.innerText}
                <audio ref={(node) => {
                 const map = getMap();
